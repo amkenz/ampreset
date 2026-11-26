@@ -694,7 +694,7 @@ input[type=file]{display:none}
 (function () {
   'use strict';
 
-  const API_BASE = '/api/ampreset?url=';
+  const API_BASE = 'https://corsproxy.io/?' + encodeURIComponent('https://api.nexadev.my.id/api/ampreset?url=');
   /* ---------- DOM ---------- */
   const $ = (s) => document.querySelector(s);
   const form       = $('#form');
