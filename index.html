@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#07070b" />
+<title>KenzAmpreset — Downloader Preset Alight Motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   KenzAmpreset — Modern Glass UI
+   ============================================================ */
+:root{
+  --accent:#ff2b4e;
+  --accent-rgb:255,43,78;
+  --text:#eef1f7;
+  --muted:#98a0b3;
+  --glass-bg:rgba(255,255,255,.055);
+  --glass-brd:rgba(255,255,255,.12);
+  --radius:20px;
+  --blur:18px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:#07070b;
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:60px;
+}
+img{display:block;max-width:100%}
+button,input,a{font-family:inherit}
+::selection{background:rgba(var(--accent-rgb),.35)}
+
+/* ---------- Background Layers ---------- */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bg-img{
+  position:absolute;inset:0;
+  background-size:cover;background-position:center;
+  opacity:0;transition:opacity .8s ease;
+  filter:saturate(1.1) brightness(.8);
+  transform:scale(1.05);
+  z-index:0;
+}
+.bg-img.on{opacity:.32}
+.bg::after{
+  content:'';position:absolute;inset:0;z-index:1;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(var(--accent-rgb),.18), transparent 60%),
+    radial-gradient(900px 500px at 90% 110%, rgba(var(--accent-rgb),.12), transparent 60%),
+    linear-gradient(180deg, rgba(7,7,11,.86), rgba(7,7,11,.94));
+}
+
+/* Sharingan ring */
+.sharingan{
+  --size:min(95vmin,760px);
+  position:absolute;
+  width:var(--size);height:var(--size);
+  right:-18vmin;
+  top:50%;
+  margin-top:calc(var(--size) / -2);
+  border-radius:50%;
+  border:1px solid rgba(var(--accent-rgb),.16);
+  box-shadow:
+    inset 0 0 90px rgba(var(--accent-rgb),.07),
+    0 0 100px rgba(var(--accent-rgb),.05);
+  animation:spin 70s linear infinite;
+  opacity:.85;
+  z-index:2;
+}
+.sharingan::before{
+  content:'';position:absolute;inset:34%;border-radius:50%;
+  background:radial-gradient(circle at 50% 40%, rgba(var(--accent-rgb),.38), rgba(var(--accent-rgb),0) 72%);
+  filter:blur(3px);
+}
+.sharingan::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:1px solid rgba(var(--accent-rgb),.08);
+  transform:scale(.72);
+}
+.tomoe{
+  position:absolute;left:50%;top:50%;
+  width:11%;height:11%;
+  margin:-5.5% 0 0 -5.5%;
+  border-radius:50% 0 50% 50%;
+  background:linear-gradient(135deg, rgba(var(--accent-rgb),.6), rgba(var(--accent-rgb),.06));
+  transform:rotate(var(--a)) translateY(-330%) rotate(45deg);
+}
+.tomoe:nth-child(1){--a:0deg}
+.tomoe:nth-child(2){--a:120deg}
+.tomoe:nth-child(3){--a:240deg}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Orbs */
+.orb{
+  position:absolute;border-radius:50%;filter:blur(70px);z-index:2;
+  background:radial-gradient(circle, rgba(var(--accent-rgb),.55), transparent 70%);
+  opacity:.35;
+}
+.orb.o1{width:340px;height:340px;top:-90px;left:-80px;animation:float1 16s ease-in-out infinite}
+.orb.o2{width:280px;height:280px;bottom:-80px;right:10%;animation:float2 20s ease-in-out infinite}
+@keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,60px)}}
+@keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,-40px)}}
+
+/* Crow / Itachi silhouette */
+.crow{
+  position:absolute;z-index:2;
+  width:70px;height:28px;
+  fill:rgba(var(--accent-rgb),.5);
+  opacity:0;
+  filter:blur(.4px) drop-shadow(0 0 10px rgba(var(--accent-rgb),.35));
+  animation:fly 22s linear infinite;
+}
+.crow.c1{top:18%;animation-delay:0s;transform:scale(.9)}
+.crow.c2{top:34%;width:48px;height:20px;animation-delay:-7s;animation-duration:28s;opacity:0}
+.crow.c3{top:62%;width:56px;height:23px;animation-delay:-14s;animation-duration:25s}
+@keyframes fly{
+  0%{left:-12%;opacity:0;transform:translateY(0) rotate(-4deg) scale(.85)}
+  8%{opacity:.55}
+  50%{transform:translateY(-26px) rotate(3deg) scale(1)}
+  92%{opacity:.5}
+  100%{left:108%;opacity:0;transform:translateY(10px) rotate(-2deg) scale(.9)}
+}
+canvas#fx{position:absolute;inset:0;z-index:3;width:100%;height:100%}
+
+/* ---------- Layout ---------- */
+.wrap{
+  max-width:1000px;
+  margin:0 auto;
+  padding:22px 16px 0;
+  position:relative;
+  z-index:5;
+}
+
+/* ---------- Header ---------- */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:14px;flex-wrap:wrap;
+  padding:14px 18px;
+  margin-bottom:26px;
+  border-radius:18px;
+  background:var(--glass-bg);
+  border:1px solid var(--glass-brd);
+  backdrop-filter:blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(150%);
+  box-shadow:0 16px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{
+  width:44px;height:44px;flex:0 0 44px;
+  border-radius:14px;
+  display:grid;place-items:center;
+  font-weight:800;font-size:20px;color:#fff;
+  background:linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb),.35));
+  box-shadow:0 8px 24px rgba(var(--accent-rgb),.45), inset 0 1px 0 rgba(255,255,255,.4);
+  animation:pulseLogo 3.5s ease-in-out infinite;
+}
+@keyframes pulseLogo{
+  0%,100%{box-shadow:0 8px 24px rgba(var(--accent-rgb),.45), inset 0 1px 0 rgba(255,255,255,.4)}
+  50%{box-shadow:0 8px 38px rgba(var(--accent-rgb),.8), inset 0 1px 0 rgba(255,255,255,.4)}
+}
+.brand h1{
+  font-size:19px;font-weight:800;letter-spacing:-.3px;line-height:1.1;
+  white-space:nowrap;
+}
+.brand h1 span{color:var(--accent)}
+.brand p{font-size:11.5px;color:var(--muted);margin-top:3px;letter-spacing:.2px}
+
+.icon-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 15px;
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--glass-brd);
+  color:var(--text);
+  font-size:13px;font-weight:600;
+  cursor:pointer;
+  transition:.25s;
+}
+.icon-btn:hover{background:rgba(var(--accent-rgb),.18);border-color:rgba(var(--accent-rgb),.5);transform:translateY(-1px)}
+
+/* ---------- Card ---------- */
+.glass{
+  background:var(--glass-bg);
+  border:1px solid var(--glass-brd);
+  backdrop-filter:blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(150%);
+  border-radius:var(--radius);
+  box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07);
+}
+
+/* ---------- Hero / Search ---------- */
+.hero{padding:30px 26px;margin-bottom:20px;position:relative;overflow:hidden}
+.hero::before{
+  content:'';position:absolute;top:-60%;left:-10%;width:60%;height:220%;
+  background:radial-gradient(circle, rgba(var(--accent-rgb),.22), transparent 65%);
+  filter:blur(30px);pointer-events:none;
+}
+.hero h2{
+  font-size:clamp(22px,4vw,30px);
+  font-weight:800;letter-spacing:-.7px;line-height:1.15;
+  position:relative;
+}
+.hero h2 em{
+  font-style:normal;
+  background:linear-gradient(90deg, var(--accent), #fff 140%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero .sub{color:var(--muted);font-size:13.5px;margin-top:9px;position:relative}
+
+.searchbar{
+  display:flex;gap:10px;margin-top:22px;position:relative;
+}
+.searchbar input{
+  flex:1;min-width:0;
+  padding:15px 18px;
+  border-radius:14px;
+  background:rgba(0,0,0,.35);
+  border:1px solid var(--glass-brd);
+  color:var(--text);
+  font-size:14px;
+  outline:none;
+  transition:.25s;
+}
+.searchbar input::placeholder{color:#6c7488}
+.searchbar input:focus{
+  border-color:rgba(var(--accent-rgb),.7);
+  box-shadow:0 0 0 4px rgba(var(--accent-rgb),.14);
+  background:rgba(0,0,0,.5);
+}
+.btn-primary{
+  padding:15px 26px;
+  border:none;border-radius:14px;
+  background:linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb),.6));
+  color:#fff;font-weight:700;font-size:14px;
+  cursor:pointer;white-space:nowrap;
+  box-shadow:0 10px 28px rgba(var(--accent-rgb),.4);
+  transition:.25s;
+  display:inline-flex;align-items:center;gap:9px;justify-content:center;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(var(--accent-rgb),.6)}
+.btn-primary:active{transform:translateY(0) scale(.98)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;position:relative}
+.chip{
+  font-size:11.5px;font-weight:600;
+  padding:7px 13px;border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--glass-brd);
+  color:var(--muted);cursor:pointer;transition:.2s;
+}
+.chip:hover{color:#fff;border-color:rgba(var(--accent-rgb),.6);background:rgba(var(--accent-rgb),.15)}
+
+/* ---------- Loading ---------- */
+.loading{
+  padding:52px 24px;
+  text-align:center;
+  display:none;
+  margin-bottom:20px;
+  animation:fadeUp .45s ease;
+}
+.loading.show{display:block}
+.loader-ring{
+  width:86px;height:86px;margin:0 auto 26px;
+  border-radius:50%;
+  position:relative;
+  background:conic-gradient(from 0deg, transparent 0%, rgba(var(--accent-rgb),1) 55%, transparent 85%);
+  animation:spin 1.15s linear infinite;
+  filter:drop-shadow(0 0 14px rgba(var(--accent-rgb),.7));
+}
+.loader-ring::after{
+  content:'';position:absolute;inset:9px;border-radius:50%;
+  background:#0b0b11;
+  box-shadow:inset 0 0 22px rgba(var(--accent-rgb),.35);
+}
+.loader-ring::before{
+  content:'';position:absolute;inset:26px;border-radius:50%;
+  background:radial-gradient(circle, rgba(var(--accent-rgb),.9), transparent 72%);
+  z-index:2;animation:beat 1.4s ease-in-out infinite;
+}
+@keyframes beat{0%,100%{transform:scale(.85);opacity:.7}50%{transform:scale(1.25);opacity:1}}
+
+.kenz-word{
+  font-size:clamp(19px,4.5vw,25px);
+  font-weight:800;
+  letter-spacing:1.5px;
+  text-transform:lowercase;
+  margin-bottom:8px;
+}
+.kenz-word span{
+  display:inline-block;
+  color:#fff;
+  animation:wave 1.25s ease-in-out infinite;
+}
+@keyframes wave{
+  0%,100%{transform:translateY(0);opacity:.45;color:#fff}
+  50%{transform:translateY(-11px);opacity:1;color:var(--accent);
+      text-shadow:0 0 18px rgba(var(--accent-rgb),.9)}
+}
+.loading .tip{font-size:12.5px;color:var(--muted);margin-top:6px}
+
+/* ---------- Error ---------- */
+.error{
+  display:none;
+  padding:22px 22px;
+  margin-bottom:20px;
+  border-color:rgba(255,80,80,.35);
+  background:rgba(255,50,50,.07);
+  animation:fadeUp .45s ease;
+}
+.error.show{display:block}
+.error h4{font-size:14.5px;color:#ff8a8a;margin-bottom:6px}
+.error p{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ---------- Result ---------- */
+#result{display:none;animation:fadeUp .5s ease}
+#result.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.video-card{
+  display:flex;gap:16px;padding:16px;margin-bottom:20px;
+  align-items:stretch;
+}
+.video-card .cover{
+  width:104px;height:138px;flex:0 0 104px;
+  object-fit:cover;border-radius:14px;
+  background:#161620;
+  box-shadow:0 10px 26px rgba(0,0,0,.55);
+}
+.video-card .v-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.video-card .desc{
+  font-size:13.5px;line-height:1.55;color:#dfe3ec;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.video-card .stats{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.video-card .stats b{color:#fff;font-weight:700}
+.v-author{display:flex;align-items:center;gap:9px}
+.v-author img{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(var(--accent-rgb),.6)}
+.v-author span{font-size:12.5px;font-weight:600;color:var(--accent)}
+
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;flex-wrap:wrap;margin-bottom:14px;
+}
+.section-head h3{font-size:16px;font-weight:700;letter-spacing:-.3px}
+.section-head .count{
+  font-size:11.5px;font-weight:700;
+  padding:5px 12px;border-radius:999px;
+  background:rgba(var(--accent-rgb),.18);
+  border:1px solid rgba(var(--accent-rgb),.4);
+  color:var(--accent);
+}
+
+.presets{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(272px,1fr));
+  gap:14px;
+}
+.preset{
+  padding:15px;
+  display:flex;flex-direction:column;gap:12px;
+  transition:transform .3s, border-color .3s, box-shadow .3s;
+  position:relative;overflow:hidden;
+}
+.preset::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(400px 120px at 100% 0%, rgba(var(--accent-rgb),.16), transparent 70%);
+  opacity:0;transition:.35s;pointer-events:none;
+}
+.preset:hover{
+  transform:translateY(-4px);
+  border-color:rgba(var(--accent-rgb),.45);
+  box-shadow:0 22px 46px rgba(0,0,0,.55), 0 0 0 1px rgba(var(--accent-rgb),.2);
+}
+.preset:hover::before{opacity:1}
+
+.p-top{display:flex;align-items:center;gap:10px;position:relative}
+.p-top img{
+  width:42px;height:42px;border-radius:12px;object-fit:cover;
+  border:1px solid var(--glass-brd);background:#161620;
+}
+.badge{
+  margin-left:auto;
+  font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+  padding:6px 11px;border-radius:9px;
+  background:rgba(var(--accent-rgb),.18);
+  border:1px solid rgba(var(--accent-rgb),.45);
+  color:var(--accent);
+}
+.badge.xml{
+  background:rgba(90,160,255,.15);
+  border-color:rgba(90,160,255,.45);
+  color:#7fb4ff;
+}
+.p-user{font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.p-src{font-size:10.5px;color:var(--muted);margin-top:2px}
+
+.p-detail{
+  font-size:11.5px;line-height:1.55;color:#9aa2b5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  word-break:break-word;
+  position:relative;
+}
+.p-actions{display:flex;gap:8px;margin-top:auto;position:relative}
+.btn{
+  flex:1;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 12px;
+  border-radius:11px;
+  font-size:12.5px;font-weight:700;
+  text-decoration:none;cursor:pointer;border:1px solid transparent;
+  transition:.22s;white-space:nowrap;
+}
+.btn.dl{
+  background:linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb),.62));
+  color:#fff;
+  box-shadow:0 8px 20px rgba(var(--accent-rgb),.32);
+}
+.btn.dl:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(var(--accent-rgb),.5)}
+.btn.ghost{
+  flex:0 0 auto;padding:11px 14px;
+  background:rgba(255,255,255,.06);
+  border-color:var(--glass-brd);
+  color:var(--muted);
+}
+.btn.ghost:hover{color:#fff;border-color:rgba(var(--accent-rgb),.55);background:rgba(var(--accent-rgb),.14)}
+.btn.ghost.copied{color:#4ade80;border-color:rgba(74,222,128,.5);background:rgba(74,222,128,.12)}
+
+/* ---------- Theme Panel ---------- */
+.panel{
+  position:fixed;
+  top:0;right:0;height:100%;
+  width:min(330px, 92vw);
+  padding:22px 20px;
+  border-radius:0;
+  border-right:none;border-top:none;border-bottom:none;
+  background:rgba(14,14,20,.82);
+  backdrop-filter:blur(26px) saturate(160%);
+  -webkit-backdrop-filter:blur(26px) saturate(160%);
+  transform:translateX(105%);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+  z-index:100;
+  overflow-y:auto;
+  box-shadow:-20px 0 60px rgba(0,0,0,.6);
+}
+.panel.open{transform:translateX(0)}
+.panel h3{font-size:15px;font-weight:800;margin-bottom:4px}
+.panel .p-sub{font-size:11.5px;color:var(--muted);margin-bottom:20px}
+.p-group{margin-bottom:22px}
+.p-label{
+  font-size:11px;font-weight:700;letter-spacing:.9px;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:10px;display:block;
+}
+.swatches{display:flex;gap:9px;flex-wrap:wrap}
+.swatch{
+  width:36px;height:36px;border-radius:11px;cursor:pointer;
+  border:2px solid transparent;
+  transition:.22s;
+  position:relative;
+}
+.swatch:hover{transform:scale(1.12)}
+.swatch.active{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.15)}
+
+.p-input{
+  width:100%;padding:11px 13px;border-radius:11px;
+  background:rgba(0,0,0,.4);
+  border:1px solid var(--glass-brd);
+  color:var(--text);font-size:13px;outline:none;
+}
+.p-input:focus{border-color:rgba(var(--accent-rgb),.7)}
+
+.file-label{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px;border-radius:11px;cursor:pointer;
+  border:1.5px dashed rgba(var(--accent-rgb),.45);
+  background:rgba(var(--accent-rgb),.07);
+  font-size:12.5px;font-weight:600;color:var(--accent);
+  transition:.22s;text-align:center;
+}
+.file-label:hover{background:rgba(var(--accent-rgb),.16)}
+input[type=file]{display:none}
+
+.panel-close{
+  position:absolute;top:16px;right:16px;
+  width:34px;height:34px;border-radius:10px;
+  background:rgba(255,255,255,.07);border:1px solid var(--glass-brd);
+  color:#fff;font-size:17px;cursor:pointer;line-height:1;
+  transition:.2s;
+}
+.panel-close:hover{background:rgba(var(--accent-rgb),.3)}
+
+.slider{
+  width:100%;-webkit-appearance:none;appearance:none;height:5px;border-radius:99px;
+  background:rgba(255,255,255,.13);outline:none;
+}
+.slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+  background:var(--accent);cursor:pointer;
+  box-shadow:0 0 12px rgba(var(--accent-rgb),.9);
+}
+.slider::-moz-range-thumb{
+  width:17px;height:17px;border:none;border-radius:50%;
+  background:var(--accent);cursor:pointer;
+}
+
+/* ---------- Footer ---------- */
+.footer{
+  text-align:center;margin-top:38px;
+  font-size:11.5px;color:#5b6273;line-height:1.8;
+}
+.footer b{color:var(--accent);font-weight:700}
+
+/* ---------- Utilities ---------- */
+.hidden{display:none !important}
+
+/* ---------- Responsive ---------- */
+@media (max-width:620px){
+  .wrap{padding:14px 12px 0}
+  .hero{padding:24px 18px}
+  .searchbar{flex-direction:column}
+  .btn-primary{width:100%}
+  .video-card{flex-direction:column}
+  .video-card .cover{width:100%;height:180px;flex:none}
+  .presets{grid-template-columns:1fr}
+  .brand h1{font-size:17px}
+  .topbar{padding:12px 14px}
+  .sharingan{right:-45vmin;opacity:.5}
+  .crow{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= BACKGROUND ================= -->
+<div class="bg" aria-hidden="true">
+  <div class="bg-img" id="bgImg"></div>
+
+  <div class="sharingan">
+    <span class="tomoe"></span>
+    <span class="tomoe"></span>
+    <span class="tomoe"></span>
+  </div>
+
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+
+  <!-- Itachi-inspired crows -->
+  <svg class="crow c1" viewBox="0 0 100 40">
+    <path d="M50 10 C60 0 75 2 90 12 C75 10 65 14 58 22 C54 18 52 16 50 14 C48 16 46 18 42 22 C35 14 25 10 10 12 C25 2 40 0 50 10 Z"/>
+  </svg>
+  <svg class="crow c2" viewBox="0 0 100 40">
+    <path d="M50 10 C60 0 75 2 90 12 C75 10 65 14 58 22 C54 18 52 16 50 14 C48 16 46 18 42 22 C35 14 25 10 10 12 C25 2 40 0 50 10 Z"/>
+  </svg>
+  <svg class="crow c3" viewBox="0 0 100 40">
+    <path d="M50 10 C60 0 75 2 90 12 C75 10 65 14 58 22 C54 18 52 16 50 14 C48 16 46 18 42 22 C35 14 25 10 10 12 C25 2 40 0 50 10 Z"/>
+  </svg>
+
+  <canvas id="fx"></canvas>
+</div>
+
+<!-- ================= MAIN ================= -->
+<div class="wrap">
+
+  <!-- Header -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">K</div>
+      <div>
+        <h1>Kenz<span>Ampreset</span></h1>
+        <p>Downloader Preset Alight Motion</p>
+      </div>
+    </div>
+    <button class="icon-btn" id="themeBtn" type="button">
+      <span>⚙️</span> Atur Tema
+    </button>
+  </header>
+
+  <!-- Hero / Search -->
+  <section class="glass hero">
+    <h2>Download <em>Preset AM</em> dalam sekali klik</h2>
+    <p class="sub">Tempel link TikTok yang berisi preset Alight Motion — sistem akan memindai otomatis.</p>
+
+    <form class="searchbar" id="form" autocomplete="off">
+      <input
+        type="url"
+        id="url"
+        placeholder="https://vt.tiktok.com/xxxxxxxxx/"
+        required
+        spellcheck="false"
+      />
+      <button type="submit" class="btn-primary" id="submitBtn">
+        <span>🔍</span> Cari Preset
+      </button>
+    </form>
+
+    <div class="chip-row">
+      <button class="chip" type="button" id="sampleBtn">📋 Pakai Contoh Link</button>
+      <button class="chip" type="button" id="pasteBtn">📥 Tempel dari Clipboard</button>
+    </div>
+  </section>
+
+  <!-- Loading -->
+  <section class="glass loading" id="loading">
+    <div class="loader-ring"></div>
+    <div class="kenz-word" id="kenzWord">ampresetkenz</div>
+    <p class="tip">Sedang memindai preset… mohon tunggu sebentar</p>
+  </section>
+
+  <!-- Error -->
+  <section class="glass error" id="error">
+    <h4>⚠️ Gagal mengambil data</h4>
+    <p id="errorMsg">Terjadi kesalahan.</p>
+  </section>
+
+  <!-- Result -->
+  <section id="result">
+    <div class="glass video-card" id="videoCard"></div>
+
+    <div class="section-head">
+      <h3>🎬 Daftar Preset</h3>
+      <span class="count" id="presetCount">0 Preset</span>
+    </div>
+
+    <div class="presets" id="presets"></div>
+  </section>
+
+  <p class="footer">
+    <b>KenzAmpreset</b> · Powered by Nexa API<br/>
+    Gunakan dengan bijak — hormati kreator asli preset.
+  </p>
+</div>
+
+<!-- ================= THEME PANEL ================= -->
+<aside class="panel" id="panel">
+  <button class="panel-close" id="panelClose" type="button">✕</button>
+  <h3>🎨 Atur Tema</h3>
+  <p class="p-sub">Personalisasi tampilan sesuai selera kamu.</p>
+
+  <div class="p-group">
+    <label class="p-label">Warna Aksen</label>
+    <div class="swatches" id="swatches">
+      <div class="swatch active" data-color="#ff2b4e" style="background:linear-gradient(135deg,#ff2b4e,#ff6b3d)"></div>
+      <div class="swatch" data-color="#8b5cf6" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)"></div>
+      <div class="swatch" data-color="#3b82f6" style="background:linear-gradient(135deg,#3b82f6,#06b6d4)"></div>
+      <div class="swatch" data-color="#10b981" style="background:linear-gradient(135deg,#10b981,#84cc16)"></div>
+      <div class="swatch" data-color="#f59e0b" style="background:linear-gradient(135deg,#f59e0b,#ef4444)"></div>
+      <div class="swatch" data-color="#ec4899" style="background:linear-gradient(135deg,#ec4899,#f43f5e)"></div>
+    </div>
+  </div>
+
+  <div class="p-group">
+    <label class="p-label">Warna Kustom</label>
+    <input type="color" id="colorPick" class="p-input" value="#ff2b4e" style="height:44px;padding:5px;cursor:pointer">
+  </div>
+
+  <div class="p-group">
+    <label class="p-label">Foto Latar Sendiri</label>
+    <label class="file-label" for="bgFile">
+      🖼️ Pilih Gambar Latar
+    </label>
+    <input type="file" id="bgFile" accept="image/*">
+    <button class="icon-btn" id="resetBg" type="button" style="width:100%;margin-top:9px;justify-content:center">
+      🗑️ Hapus Latar
+    </button>
+  </div>
+
+  <div class="p-group">
+    <label class="p-label">Intensitas Blur Glass · <span id="blurVal">18</span>px</label>
+    <input type="range" id="blurRange" class="slider" min="0" max="34" value="18" step="1">
+  </div>
+
+  <div class="p-group">
+    <button class="icon-btn" id="resetAll" type="button" style="width:100%;justify-content:center">
+      ♻️ Reset Semua Tema
+    </button>
+  </div>
+</aside>
+
+<script>
+/* ============================================================
+   KenzAmpreset — Script
+   ============================================================ */
+(function () {
+  'use strict';
+
+  const API_BASE = 'https://api.nexadev.my.id/api/ampreset?url=';
+
+  /* ---------- DOM ---------- */
+  const $ = (s) => document.querySelector(s);
+  const form       = $('#form');
+  const urlInput   = $('#url');
+  const submitBtn  = $('#submitBtn');
+  const loadingEl  = $('#loading');
+  const errorEl    = $('#error');
+  const errorMsg   = $('#errorMsg');
+  const resultEl   = $('#result');
+  const videoCard  = $('#videoCard');
+  const presetsEl  = $('#presets');
+  const presetCount= $('#presetCount');
+  const kenzWord   = $('#kenzWord');
+
+  /* ---------- Loading Word Animation ---------- */
+  kenzWord.innerHTML = 'ampresetkenz'
+    .split('')
+    .map((c, i) => `<span style="animation-delay:${(i * 0.075).toFixed(2)}s">${c}</span>`)
+    .join('');
+
+  /* ---------- Helpers ---------- */
+  const esc = (s) => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  const fmtNum = (n) => {
+    n = Number(n) || 0;
+    if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+    return String(n);
+  };
+
+  const hexToRgb = (hex) => {
+    const h = hex.replace('#', '');
+    const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+    return {
+      r: parseInt(full.slice(0, 2), 16),
+      g: parseInt(full.slice(2, 4), 16),
+      b: parseInt(full.slice(4, 6), 16)
+    };
+  };
+
+  /* ---------- State ---------- */
+  function showLoading() {
+    loadingEl.classList.add('show');
+    errorEl.classList.remove('show');
+    resultEl.classList.remove('show');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>⏳</span> Memindai…';
+  }
+  function hideLoading() {
+    loadingEl.classList.remove('show');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span>🔍</span> Cari Preset';
+  }
+  function showError(msg) {
+    hideLoading();
+    errorMsg.textContent = msg;
+    errorEl.classList.add('show');
+    resultEl.classList.remove('show');
+  }
+
+  /* ============================================================
+     FETCH & RENDER
+     ============================================================ */
+  async function cariPreset(rawUrl) {
+    const url = rawUrl.trim();
+    if (!url) return;
+
+    showLoading();
+
+    try {
+      const res = await fetch(API_BASE + encodeURIComponent(url), {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (!res.ok) throw new Error('Server merespon dengan status ' + res.status);
+
+      const data = await res.json();
+
+      if (!data || data.ok === false) {
+        throw new Error(data && data.message ? data.message : 'Preset tidak ditemukan pada link tersebut.');
+      }
+
+      // delay kecil supaya animasi loading terasa
+      await new Promise(r => setTimeout(r, 420));
+
+      render(data);
+      hideLoading();
+      resultEl.classList.add('show');
+      resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch (err) {
+      console.error(err);
+      showError(
+        (err && err.message ? err.message : 'Kesalahan tidak diketahui') +
+        '. Pastikan link valid dan API dapat diakses (CORS).'
+      );
+    }
+  }
+
+  /* ---------- Render Hasil ---------- */
+  function render(data) {
+    const v = data.video || {};
+    const a = data.author || {};
+    const presets = Array.isArray(data.presets) ? data.presets : [];
+
+    /* --- Video Card --- */
+    videoCard.innerHTML = `
+      ${v.cover
+        ? `<img class="cover" src="${esc(v.cover)}" alt="Cover video" loading="lazy"
+                onerror="this.style.display='none'">`
+        : `<div class="cover"></div>`}
+      <div class="v-info">
+        ${a.username ? `
+          <div class="v-author">
+            ${a.avatar ? `<img src="${esc(a.avatar)}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
+            <span>@${esc(a.username)}</span>
+          </div>` : ''}
+        <p class="desc">${esc(v.description || 'Tanpa deskripsi')}</p>
+        <div class="stats">
+          <span>👁️ <b>${fmtNum(v.views)}</b></span>
+          <span>❤️ <b>${fmtNum(v.likes)}</b></span>
+          <span>💬 <b>${fmtNum(v.comments)}</b></span>
+          <span>📦 <b>${esc(String(data.total ?? presets.length))}</b> preset</span>
+        </div>
+      </div>
+    `;
+
+    /* --- Presets --- */
+    presetCount.textContent = presets.length + ' Preset';
+    presetsEl.innerHTML = '';
+
+    if (!presets.length) {
+      presetsEl.innerHTML = `
+        <div class="glass preset" style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px">
+          Tidak ada preset yang ditemukan pada video ini.
+        </div>`;
+      return;
+    }
+
+    presets.forEach((p, i) => {
+      const type = (p.type || 'am').toLowerCase();
+      const isXml = type === 'xml';
+      const link  = p.download || p.url || '#';
+
+      const card = document.createElement('article');
+      card.className = 'glass preset';
+      card.style.animation = `fadeUp .45s ease ${(i * 0.06).toFixed(2)}s both`;
+
+      card.innerHTML = `
+        <div class="p-top">
+          ${p.thumb
+            ? `<img src="${esc(p.thumb)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
+            : `<img alt="" style="visibility:hidden">`}
+          <div style="min-width:0;flex:1">
+            <div class="p-user">${esc(p.commenter || '@unknown')}</div>
+            <div class="p-src">${esc(p.source || 'comment')}${p.pinned ? ' · 📌 pinned' : ''}</div>
+          </div>
+          <span class="badge ${isXml ? 'xml' : ''}">${esc(type)}</span>
+        </div>
+
+        <p class="p-detail">${esc(p.detail || p.url || '')}</p>
+
+        <div class="p-actions">
+          <a class="btn dl" href="${esc(link)}" target="_blank" rel="noopener noreferrer">
+            ${p.download ? '⬇️ Download' : '🔗 Buka Link'}
+          </a>
+          <button class="btn ghost copy-btn" type="button" data-url="${esc(p.url || link)}">
+            📋 Copy
+          </button>
+        </div>
+      `;
+
+      presetsEl.appendChild(card);
+    });
+
+    /* Copy handler */
+    presetsEl.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const text = btn.getAttribute('data-url') || '';
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        const original = btn.textContent;
+        btn.textContent = '✅ Tersalin';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove('copied');
+        }, 1600);
+      });
+    });
+  }
+
+  /* ============================================================
+     EVENTS
+     ============================================================ */
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    cariPreset(urlInput.value);
+  });
+
+  $('#sampleBtn').addEventListener('click', () => {
+    urlInput.value = 'https://vt.tiktok.com/ZSbQn3Sys/';
+    urlInput.focus();
+  });
+
+  $('#pasteBtn').addEventListener('click', async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        urlInput.value = text.trim();
+        urlInput.focus();
+      }
+    } catch {
+      alert('Browser tidak mengizinkan akses clipboard. Tempel manual ya.');
+    }
+  });
+
+  /* ============================================================
+     THEME SYSTEM
+     ============================================================ */
+  const root = document.documentElement;
+  const bgImg = $('#bgImg');
+  const panel = $('#panel');
+
+  /* --- Sprite partikel (dibuat ulang saat warna berubah) --- */
+  let sprite = null;
+  function buildSprite(r, g, b) {
+    const s = document.createElement('canvas');
+    s.width = s.height = 64;
+    const g2 = s.getContext('2d');
+    const grd = g2.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grd.addColorStop(0, `rgba(${r},${g},${b},1)`);
+    grd.addColorStop(0.3, `rgba(${r},${g},${b},0.42)`);
+    grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
+    g2.fillStyle = grd;
+    g2.fillRect(0, 0, 64, 64);
+    sprite = s;
+  }
+
+  function setAccent(hex) {
+    const { r, g, b } = hexToRgb(hex);
+    root.style.setProperty('--accent', hex);
+    root.style.setProperty('--accent-rgb', `${r},${g},${b}`);
+    buildSprite(r, g, b);
+
+    document.querySelectorAll('.swatch').forEach(sw => {
+      sw.classList.toggle('active', sw.dataset.color.toLowerCase() === hex.toLowerCase());
+    });
+    $('#colorPick').value = hex;
+
+    try { localStorage.setItem('kenz-accent', hex); } catch {}
+  }
+
+  /* --- Swatches --- */
+  document.querySelectorAll('.swatch').forEach(sw => {
+    sw.addEventListener('click', () => setAccent(sw.dataset.color));
+  });
+
+  /* --- Custom color --- */
+  $('#colorPick').addEventListener('input', (e) => setAccent(e.target.value));
+
+  /* --- Background image --- */
+  $('#bgFile').addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      bgImg.style.backgroundImage = `url("${ev.target.result}")`;
+      bgImg.classList.add('on');
+    };
+    reader.readAsDataURL(file);
+  });
+
+  $('#resetBg').addEventListener('click', () => {
+    bgImg.style.backgroundImage = '';
+    bgImg.classList.remove('on');
+    $('#bgFile').value = '';
+  });
+
+  /* --- Blur slider --- */
+  const blurRange = $('#blurRange');
+  blurRange.addEventListener('input', (e) => {
+    root.style.setProperty('--blur', e.target.value + 'px');
+    $('#blurVal').textContent = e.target.value;
+  });
+
+  /* --- Panel toggle --- */
+  $('#themeBtn').addEventListener('click', () => panel.classList.toggle('open'));
+  $('#panelClose').addEventListener('click', () => panel.classList.remove('open'));
+  document.addEventListener('click', (e) => {
+    if (panel.classList.contains('open') &&
+        !panel.contains(e.target) &&
+        !$('#themeBtn').contains(e.target)) {
+      panel.classList.remove('open');
+    }
+  });
+
+  /* --- Reset all --- */
+  $('#resetAll').addEventListener('click', () => {
+    setAccent('#ff2b4e');
+    bgImg.style.backgroundImage = '';
+    bgImg.classList.remove('on');
+    $('#bgFile').value = '';
+    root.style.setProperty('--blur', '18px');
+    blurRange.value = 18;
+    $('#blurVal').textContent = '18';
+    try { localStorage.removeItem('kenz-accent'); } catch {}
+  });
+
+  /* --- Restore theme --- */
+  try {
+    const saved = localStorage.getItem('kenz-accent');
+    if (saved) setAccent(saved);
+    else setAccent('#ff2b4e');
+  } catch { setAccent('#ff2b4e'); }
+
+  /* ============================================================
+     PARTICLE CANVAS
+     ============================================================ */
+  const cvs = $('#fx');
+  const ctx = cvs.getContext('2d');
+  let W = 0, H = 0, parts = [], rafId = null, running = true;
+
+  function resizeCanvas() {
+    W = cvs.width = window.innerWidth;
+    H = cvs.height = window.innerHeight;
+    initParticles();
+  }
+
+  function initParticles() {
+    const count = Math.min(70, Math.max(24, Math.round(W / 22)));
+    parts = [];
+    for (let i = 0; i < count; i++) {
+      parts.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: 0.8 + Math.random() * 2.6,
+        a: 0.15 + Math.random() * 0.55,
+        vy: -(0.12 + Math.random() * 0.45),
+        vx: (Math.random() - 0.5) * 0.28,
+        tw: Math.random() * Math.PI * 2,
+        ts: 0.008 + Math.random() * 0.02
+      });
+    }
+  }
+
+  function loop() {
+    if (!running) return;
+    ctx.clearRect(0, 0, W, H);
+
+    if (!sprite) buildSprite(255, 43, 78);
+
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.tw += p.ts;
+
+      if (p.y < -20) { p.y = H + 20; p.x = Math.random() * W; }
+      if (p.x < -20) p.x = W + 20;
+      if (p.x > W + 20) p.x = -20;
+
+      const alpha = p.a * (0.55 + 0.45 * Math.sin(p.tw));
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(sprite, p.x - p.r * 3, p.y - p.r * 3, p.r * 6, p.r * 6);
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    rafId = requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      running = false;
+      if (rafId) cancelAnimationFrame(rafId);
+    } else if (!running) {
+      running = true;
+      loop();
+    }
+  });
+
+  resizeCanvas();
+  loop();
+
+})();
+</script>
+</body>
+</html>
